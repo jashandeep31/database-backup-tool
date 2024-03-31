@@ -31,7 +31,7 @@ function main() {
     // if not needed remove the docker command and run the command directly
 
     exec(
-      `docker exec -it c7d1404fccc9 PGPASSWORD=${item.PASSWORD} pg_dump -h ${item.HOST} -p ${item.PORT} -U ${item.USER} -d ${item.NAME} > ${filePath}`,
+      `docker exec -i c7d1404fccc9 PGPASSWORD=${item.PASSWORD} pg_dump -h ${item.HOST} -p ${item.PORT} -U ${item.USER} -d ${item.NAME} > ${filePath}`,
       async (error, stdout, stderr) => {
         if (!error) {
           const formData = new FormData();
