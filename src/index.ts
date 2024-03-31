@@ -51,7 +51,9 @@ function main() {
                 body: formData,
               }
             );
-          } catch (error) {}
+          } catch (error) {
+            console.log(error);
+          }
           fs.unlinkSync(filePath);
         } else {
           try {
@@ -62,7 +64,10 @@ function main() {
                 process.env.GROUP_ID
               }&text=Failed to backup ${item.NAME} ❌`
             );
-          } catch (error) {}
+          } catch (error) {
+            console.log(error);
+          }
+          console.log(error);
           fs.unlinkSync(filePath);
         }
       }
@@ -70,13 +75,14 @@ function main() {
   });
 }
 
-cron.schedule(" * */6 * * *", () => {
-  try {
-    main();
-    console.log("first");
-  } catch (error) {}
-});
+// cron.schedule(" * */6 * * *", () => {
+//   try {
+//     main();
+//     console.log("first");
+//   } catch (error) {}
+// });
 
+main();
 app.listen(PORT, () => {
   console.log(`Server is firing up at 🔥 ${PORT}`);
 });
