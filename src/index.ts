@@ -26,8 +26,12 @@ function main() {
       .toISOString()
       .replace(/:/g, "-")}.sql`;
     const filePath = path.join(dir, fileName);
+
+    // docker command is added to the exec function to run the command in the docker container
+    // if not needed remove the docker command and run the command directly
+
     exec(
-      `PGPASSWORD=${item.PASSWORD} pg_dump -h ${item.HOST} -p ${item.PORT} -U ${item.USER} -d ${item.NAME} > ${filePath}`,
+      `docker exec -it c7d1404fccc9 PGPASSWORD=${item.PASSWORD} pg_dump -h ${item.HOST} -p ${item.PORT} -U ${item.USER} -d ${item.NAME} > ${filePath}`,
       async (error, stdout, stderr) => {
         if (!error) {
           const formData = new FormData();
@@ -75,12 +79,13 @@ function main() {
   });
 }
 
-// cron.schedule(" * */6 * * *", () => {
-//   try {
-//     main();
-//     console.log("first");
-//   } catch (error) {}
-// });
+// Use https://crontab.guru/#0_*/6_*_*_* for cron schedule
+cron.schedule("0 */6 * * *", () => {
+  try {
+    main();
+    console.log("first");
+  } catch (error) {}
+});
 
 main();
 app.listen(PORT, () => {
