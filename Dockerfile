@@ -7,10 +7,11 @@ RUN echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg m
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 # Update package lists
-RUN apt-get  update -y
+RUN apt  update -y
 
 # Install PostgreSQL
-RUN apt-get -y install postgresql
+
+RUN apt-get install -y postgresql
 
 WORKDIR /app
 COPY . /app
