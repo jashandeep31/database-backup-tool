@@ -29,50 +29,48 @@ function main() {
 
     // docker command is added to the exec function to run the command in the docker container
     // if not needed remove the docker command and run the command directly
-    const backupCommand = `docker exec -i  c7d1404fccc9 bash -c 'PGPASSWORD=${item.PASSWORD} pg_dump -h ${item.HOST} -p ${item.PORT} -U ${item.USER} -d ${item.NAME}' > ${filePath}`;
+    const backupCommand = `docker exec -i  ${process.env.DOCKER_ID} bash -c 'PGPASSWORD=${item.PASSWORD} pg_dump -h ${item.HOST} -p ${item.PORT} -U ${item.USER} -d ${item.NAME}' > ${filePath}`;
 
     exec(backupCommand, async (error, stdout, stderr) => {
-        if (!error) {
-          const formData = new FormData();
-          formData.append("chat_id", process.env.GROUP_ID ?? "");
-          const fileBuffer = fs.readFileSync(filePath);
-          const blob = new Blob([fileBuffer]);
-          formData.append("document", blob);
-          formData.append(
-            "caption",
-            `Backup of ${
-              item.NAME
-            } \n ${new Date().toLocaleDateString()} \n ✅ ✅`
+      if (!error) {
+        const formData = new FormData();
+        formData.append("chat_id", process.env.GROUP_ID ?? "");
+        const fileBuffer = fs.readFileSync(filePath);
+        const blob = new Blob([fileBuffer]);
+        formData.append("document", blob, fileName);
+        formData.append(
+          "caption",
+          `Backup of ${
+            item.NAME
+          } \n ${new Date().toLocaleDateString()} \n ✅ ✅`
+        );
+        console.log(fs.readFileSync(filePath));
+
+        try {
+          const res = await fetch(
+            `https://api.telegram.org/${
+              process.env.BOT_TOKEN ?? ""
+            }/sendDocument`,
+            {
+              method: "POST",
+              body: formData,
+            }
           );
-          console.log(fs.readFileSync(filePath))
-          try {
-           const res=  await fetch(
-              `https://api.telegram.org/${
-                process.env.BOT_TOKEN ?? ""
-              }/sendDocument`,
-              {
-                method: "POST",
-                body: formData,
-              }
-            );
-          } catch (error) {
-          }
-          fs.unlinkSync(filePath);
-        } else {
-          try {
-            await fetch(
-              `https://api.telegram.org/${
-                process.env.BOT_TOKEN ?? ""
-              }/sendMessage?chat_id=${
-                process.env.GROUP_ID
-              }&text=Failed to backup ${item.NAME} ❌`
-            );
-          } catch (error) {
-          }
-          fs.unlinkSync(filePath);
-        }
+        } catch (error) {}
+        fs.unlinkSync(filePath);
+      } else {
+        try {
+          await fetch(
+            `https://api.telegram.org/${
+              process.env.BOT_TOKEN ?? ""
+            }/sendMessage?chat_id=${
+              process.env.GROUP_ID
+            }&text=Failed to backup ${item.NAME} ❌`
+          );
+        } catch (error) {}
+        fs.unlinkSync(filePath);
       }
-    );
+    });
   });
 }
 
